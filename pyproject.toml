@@ -1,7 +1,7 @@
 [project]
 name = "photo-sorter"
-version = "1.0.0"
-description = ""
+version = "1.0.1"
+description = "A small utility that organizes photos into month-wise and date-wise folders."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [

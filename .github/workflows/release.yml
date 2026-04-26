@@ -1,10 +1,8 @@
 name: Build and Release
 
 on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -26,6 +24,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -48,7 +48,6 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
 
@@ -61,11 +60,22 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R artifacts
 
+      # Each matrix build names its output "photo-sorter" / "photo-sorter.exe". Release
+      # assets are keyed by filename, so we stage unique names (matching matrix asset_name).
+      - name: Stage release assets
+        run: |
+          set -e
+          mkdir -p release-assets
+          cp "artifacts/photo-sorter-linux-amd64/photo-sorter" "release-assets/photo-sorter-linux-amd64"
+          cp "artifacts/photo-sorter-macos-amd64/photo-sorter" "release-assets/photo-sorter-macos-amd64"
+          cp "artifacts/photo-sorter-windows-amd64.exe/photo-sorter.exe" "release-assets/photo-sorter-windows-amd64.exe"
+          chmod +x release-assets/photo-sorter-linux-amd64 release-assets/photo-sorter-macos-amd64
+          ls -la release-assets
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            artifacts/photo-sorter-linux-amd64/photo-sorter
-            artifacts/photo-sorter-macos-amd64/photo-sorter
-            artifacts/photo-sorter-windows-amd64.exe/photo-sorter.exe
+          tag_name: ${{ github.event.release.tag_name }}
+          files: release-assets/*
+          fail_on_unmatched_files: true
           generate_release_notes: true

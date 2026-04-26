@@ -42,7 +42,7 @@ def main():
 
     try:
         result = subprocess.run(cmd, check=True)
-        print(f"\n✓ Build successful!")
+        print("\nBuild successful!")
         print(f"  Executable location: dist/{app_name}")
         if sys.platform == "darwin":
             print(f"  On macOS: dist/{app_name}")
@@ -52,10 +52,10 @@ def main():
             print(f"  On Linux: dist/{app_name}")
         return 0
     except subprocess.CalledProcessError as e:
-        print(f"\n✗ Build failed with error code {e.returncode}")
+        print(f"\nBuild failed with error code {e.returncode}")
         return 1
     except FileNotFoundError:
-        print("\n✗ PyInstaller not found. Install it with:")
+        print("\nPyInstaller not found. Install it with:")
         print("  pip install pyinstaller")
         return 1
 
